@@ -73,7 +73,11 @@ def do_conn_work():
 
     global client_sock
     while(True):
-        client_sock.connect((host, port))
+        try:
+            client_sock.connect((host, port))
+        except socket.error as e:
+            print(e)
+            continue
         do_furnace_work()
         client_sock = socket.socket()
 
