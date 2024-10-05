@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Network Monitor</title>
+    <style>
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #1e1e1e;
+            color: #00ff00;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            background-color: #000;
+            border: 1px solid #00ff00;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+            width: 210mm;  /* A4 width */
+            padding: 20px;
+            box-sizing: border-box;
+            overflow: auto;
+        }
+        h1 {
+            background-color: #000;
+            color: #00ff00;
+            padding: 20px;
+            text-align: center;
+            margin: 0;
+            border-bottom: 1px solid #00ff00;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            background-color: #333;
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+            transition: transform 0.2s;
+        }
+        li:hover {
+            transform: scale(1.05);
+        }
+        a {
+            text-decoration: none;
+            color: #00ff00;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Network Monitor</h1>
+        <ul>
+            {% for host in hosts %}
+            <li><a href="/host/{{ host }}">{{ host }}</a></li>
+            {% endfor %}
+        </ul>
+    </div>
+</body>
+</html>

@@ -10,11 +10,16 @@ from pygame import mixer
 
 import threading
 from threading import Lock
+import nmap
 
 import socket
 
 app = Flask(__name__)
 
+# nm = nmap.PortScanner()
+# nm.scan(hosts='192.168.0.0-255', arguments='-sP' )
+
+# host_list = nm.all_hosts()
 
 global temp, pwm, dess_temp, auto, count
 temp = 'n/c'
@@ -119,3 +124,7 @@ def values():
         os._exit(1)
     string = str(temp)+':'+str(pwm)+':'+str(auto) + ':' + str(des_temp)
     return string
+
+
+if __name__ == '__main__':
+    app.run()

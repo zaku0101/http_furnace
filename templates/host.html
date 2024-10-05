@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Device - {{ host }}</title>
+    <style>
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #1e1e1e;
+            color: #00ff00;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            background-color: #000;
+            border: 1px solid #00ff00;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+            width: 210mm;  /* A4 width */
+            height: 297mm; /* A4 height */
+            padding: 20px;
+            box-sizing: border-box;
+            overflow: auto;
+        }
+        h1 {
+            background-color: #000;
+            color: #00ff00;
+            padding: 20px;
+            text-align: center;
+            margin: 0;
+            border-bottom: 1px solid #00ff00;
+        }
+        pre {
+            background-color: #333;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+            font-size: 16px;
+            overflow: auto;
+            max-height: calc(100% - 100px); /* Adjust to fit within the container */
+            color: #00ff00;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        input[type="text"] {
+            padding: 10px;
+            border: 1px solid #00ff00;
+            border-radius: 5px;
+            background-color: #333;
+            color: #00ff00;
+        }
+        input[type="submit"] {
+            padding: 10px;
+            border: 1px solid #00ff00;
+            border-radius: 5px;
+            background-color: #333;
+            color: #00ff00;
+            cursor: pointer;
+        }
+        input[type="submit"]:hover {
+            background-color: #444;
+        }
+    </style>
+    <script>
+        function fetchLog() {
+            fetch(`/host/{{ host }}/log`)
+                .then(response => response.json())
+                .then(data => {
+                    let logPre = document.getElementById('log');
+                    logPre.innerText = data.join('');
+                });
+        }
+
+        setInterval(fetchLog, 1000);  // Refresh every second
+    </script>
+</head>
+<body onload="fetchLog()">
+    <div class="container">
+        <h1>Device - {{ host }}</h1>
+        <pre id="log"></pre>
+        <form method="POST">
+            <label for="pwm">PWM:</label>
+            <input type="text" id="pwm" name="pwm">
+            <label for="temp">Temperature:</label>
+            <input type="text" id="temp" name="temp">
+            <label for="auto">Auto:</label>
+            <input type="text" id="auto" name="auto">
+            <input type="submit" value="Submit">
+        </form>
+    </div>
+</body>
+</html>
