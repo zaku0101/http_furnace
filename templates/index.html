@@ -1,7 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Network Monitor</title>
+    <meta charset="UTF-8">
+    <title>KRZEMPOL MASZYNOWNIA</title>
     <style>
         body {
             font-family: 'Courier New', Courier, monospace;
@@ -30,36 +31,32 @@
             padding: 20px;
             text-align: center;
             margin: 0;
-            border-bottom: 1px solid #00ff00;
         }
         ul {
             list-style-type: none;
             padding: 0;
         }
         li {
-            background-color: #333;
-            margin: 10px 0;
-            padding: 15px;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
-            transition: transform 0.2s;
-        }
-        li:hover {
-            transform: scale(1.05);
+            background: #333;
+            margin: 5px 0;
+            padding: 10px;
+            border-radius: 4px;
         }
         a {
             text-decoration: none;
             color: #00ff00;
-            font-size: 18px;
+        }
+        a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Network Monitor</h1>
+        <h1>KRZEMPOL MASZYNOWNIA</h1>
         <ul>
             {% for host in hosts %}
-            <li><a href="/host/{{ host }}">{{ host }}</a></li>
+                <li><a href="{{ url_for('host_page', host=host) }}">{{ hosts_info[host]['hostname'] }}</a></li>
             {% endfor %}
         </ul>
     </div>

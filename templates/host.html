@@ -1,7 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Device - {{ host }}</title>
+    <meta charset="UTF-8">
+    <title>{{ hostname }}</title>
     <style>
         body {
             font-family: 'Courier New', Courier, monospace;
@@ -19,8 +20,8 @@
             border: 1px solid #00ff00;
             border-radius: 10px;
             box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
-            width: 210mm;  /* A4 width */
-            height: 297mm; /* A4 height */
+            width: 80%;
+            height: 80%;
             padding: 20px;
             box-sizing: border-box;
             overflow: auto;
@@ -31,69 +32,143 @@
             padding: 20px;
             text-align: center;
             margin: 0;
-            border-bottom: 1px solid #00ff00;
         }
-        pre {
-            background-color: #333;
-            margin: 20px 0;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
-            font-size: 16px;
-            overflow: auto;
-            max-height: calc(100% - 100px); /* Adjust to fit within the container */
+        ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            max-height: 70%;
+            overflow-y: scroll;
+        }
+        li {
+            background: #333;
+            margin: 5px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        a {
+            text-decoration: none;
             color: #00ff00;
         }
-        form {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
+        a:hover {
+            text-decoration: underline;
         }
         input[type="text"] {
             padding: 10px;
+            width: calc(100% - 22px);
+            margin-bottom: 10px;
             border: 1px solid #00ff00;
-            border-radius: 5px;
+            border-radius: 4px;
             background-color: #333;
             color: #00ff00;
         }
-        input[type="submit"] {
-            padding: 10px;
-            border: 1px solid #00ff00;
-            border-radius: 5px;
-            background-color: #333;
-            color: #00ff00;
+        button {
+            padding: 10px 20px;
+            background-color: #00ff00;
+            color: #000;
+            border: none;
+            border-radius: 4px;
             cursor: pointer;
         }
-        input[type="submit"]:hover {
-            background-color: #444;
+        button:hover {
+            background-color: #00cc00;
         }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
     <script>
-        function fetchLog() {
-            fetch(`/host/{{ host }}/log`)
+        const host = "{{ host }}";
+        const socket = io();
+
+        socket.on('connect', function() {
+            console.log('Connected to WebSocket');
+            socket.emit('join', {host: host});
+        });
+
+        socket.on('play_song', function(data) {
+            console.log('Received play_song event:', data);
+            if (data.host === host) {
+                const audio = document.getElementById('audio-player');
+                audio.volume = 1.0; // Ensure volume is set to maximum
+                audio.muted = false; // Ensure audio is not muted
+                audio.play().then(() => {
+                    console.log('Audio is playing');
+                }).catch(error => {
+                    console.error('Error playing audio:', error);
+                });
+            }
+        });
+
+        function fetchLogs() {
+            fetch(`/host/${host}/log`)
                 .then(response => response.json())
                 .then(data => {
-                    let logPre = document.getElementById('log');
-                    logPre.innerText = data.join('');
+                    const logList = document.getElementById('log-list');
+                    logList.innerHTML = '';
+                    data.forEach(log => {
+                        const li = document.createElement('li');
+                        li.textContent = log;
+                        logList.appendChild(li);
+                    });
                 });
         }
 
-        setInterval(fetchLog, 1000);  // Refresh every second
+        function sendData() {
+            const data = document.getElementById('data-input').value;
+            fetch(`/host/${host}/send`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ data: data })
+            })
+            .then(response => response.json())
+            .then(result => {
+                alert(result.status || result.error);
+                document.getElementById('data-input').value = ''; // Clear input field after sending
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', (event) => {
+            fetchLogs();
+            setInterval(fetchLogs, 5000); // Refresh logs every 5 seconds
+
+            // Add event listener for Enter key
+            document.getElementById('data-input').addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') {
+                    sendData();
+                }
+            });
+
+            // Stop monitoring when the tab is closed
+            window.addEventListener('beforeunload', function () {
+                socket.emit('leave', {host: host});
+                fetch(`/host/${host}/stop`, {
+                    method: 'POST'
+                });
+            });
+
+            // Ensure user interaction to allow audio playback
+            document.body.addEventListener('click', function() {
+                const audio = document.getElementById('audio-player');
+                audio.play().then(() => {
+                    console.log('Audio is playing after user interaction');
+                }).catch(error => {
+                    console.error('Error playing audio after user interaction:', error);
+                });
+            }, { once: true }); // Ensure this is only done once
+        });
     </script>
 </head>
-<body onload="fetchLog()">
+<body>
     <div class="container">
-        <h1>Device - {{ host }}</h1>
-        <pre id="log"></pre>
-        <form method="POST">
-            <label for="pwm">PWM:</label>
-            <input type="text" id="pwm" name="pwm">
-            <label for="temp">Temperature:</label>
-            <input type="text" id="temp" name="temp">
-            <label for="auto">Auto:</label>
-            <input type="text" id="auto" name="auto">
-            <input type="submit" value="Submit">
-        </form>
+        <h1>{{ hostname }}</h1>
+        <ul id="log-list"></ul>
+        <input type="text" id="data-input" placeholder="Enter data to send">
+        <button onclick="sendData()">Send Data</button>
+        <a href="{{ url_for('index') }}">Back to Host List</a>
+        <audio id="audio-player" src="/static/jestem_nagrzany.mp3">
+            <p>If you are reading this, it is because your browser does not support the audio element.</p>
+        </audio>
     </div>
 </body>
 </html>
