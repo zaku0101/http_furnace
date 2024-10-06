@@ -59,16 +59,14 @@ def monitor_host(host, hosts_info_queue):
                     # Parse the current temperature and setpoint from the received data
                     temp_str = data.split(',')[0].split(':')[1]
                     current_temp, setpoint = map(float, temp_str.split('/'))
-
-                    # Check if temperature setpoint is reached
-                    if current_temp >= setpoint:
-                        if setpoint != previous_setpoint:
-                            song_played_count = 0
-                            previous_setpoint = setpoint
-                        if song_played_count < max_plays:
-                            print(f"Temperature setpoint {setpoint} reached. Playing song in browser.")
-                            socketio.emit('play_song', {'host': host}, room=host)
-                            song_played_count += 1
+                    
+                    # Doesnt work for now idk why
+                    # # Check if temperature setpoint is reached
+                    # if current_temp >= setpoint:
+                    #     if setpoint != previous_setpoint:
+                    #         previous_setpoint = setpoint
+                    #         print(f"Temperature setpoint {setpoint} reached. Playing song in browser.")
+                    #         socketio.emit('play_song', {'host': host}, room=host)
 
                 except socket.timeout:
                     print(f"Socket timeout while receiving data from {host}")
